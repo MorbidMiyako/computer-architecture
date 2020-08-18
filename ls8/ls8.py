@@ -5,7 +5,11 @@
 import sys
 from cpu import *
 
+print8 = "examples/print8.ls8"
+mult = "examples/mult.ls8"
+
+
 cpu = CPU()
 
-cpu.load()
+cpu.load(mult)
 cpu.run()
