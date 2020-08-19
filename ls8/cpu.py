@@ -8,10 +8,11 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        self.ram = [0]*128
-        self.reg = [0]*128
+        self.ram = [0]*256
+        self.reg = [0]*256
         self.running = False
         self.pc = 0
+        self.sp = 7
         self.HLT = 0b00000001
         self.LDI = 0b10000010
         self.PRN = 0b01000111
@@ -20,11 +21,14 @@ class CPU:
         self.MUL = 0b10100010
         self.DIV = 0b10100011
         self.ALU = [self.ADD, self.SUB, self.MUL, self.DIV]
+        self.POP = 0b01000110
+        self.PUSH = 0b01000101
 
     def load(self, filename):
         """Load a program into memory."""
         try:
             address = 0
+            self.reg[self.sp] = 244
             with open(filename) as f:
                 for line in f:
                     comment_split = line.split("#")
@@ -135,5 +139,25 @@ class CPU:
                 self.alu(cmd, reg_index_a, reg_index_b)
 
                 op_size = 3
+
+            elif cmd == self.PUSH:
+                reg_index = self.ram[self.pc + 1]
+                val = self.reg[reg_index]
+
+                self.reg[self.sp] -= 1
+
+                self.ram[self.reg[self.sp]] = val
+
+                op_size = 2
+
+            elif cmd == self.POP:
+                reg_index = self.ram[self.pc + 1]
+                val = self.ram[self.reg[self.sp]]
+
+                self.reg[reg_index] = val
+
+                self.reg[self.sp] += 1
+
+                op_size = 2
 
             self.pc += op_size
