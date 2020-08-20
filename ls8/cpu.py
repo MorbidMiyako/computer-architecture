@@ -23,6 +23,8 @@ class CPU:
         self.ALU = [self.ADD, self.SUB, self.MUL, self.DIV]
         self.POP = 0b01000110
         self.PUSH = 0b01000101
+        self.CALL = 0b01010000
+        self.RET = 0b00010001
 
     def load(self, filename):
         """Load a program into memory."""
@@ -38,7 +40,6 @@ class CPU:
                         continue
 
                     val = int(n, 2)
-                    # store val in memory
                     self.ram[address] = val
 
                     address += 1
@@ -135,7 +136,6 @@ class CPU:
             elif cmd in self.ALU:
                 reg_index_a = self.ram[self.pc+1]
                 reg_index_b = self.ram[self.pc+2]
-                print(self.reg[reg_index_a], self.reg[reg_index_b])
                 self.alu(cmd, reg_index_a, reg_index_b)
 
                 op_size = 3
@@ -159,5 +159,20 @@ class CPU:
                 self.reg[self.sp] += 1
 
                 op_size = 2
+
+            elif cmd == self.CALL:
+                self.reg[self.sp] -= 1
+                self.ram[self.reg[self.sp]] = self.pc + 2
+
+                index = self.ram[self.pc + 1]
+                self.pc = self.reg[index]
+
+                op_size = 0
+
+            elif cmd == self.RET:
+                self.pc = self.ram[self.reg[self.sp]]
+                self.reg[self.sp] += 1
+
+                op_size = 0
 
             self.pc += op_size
